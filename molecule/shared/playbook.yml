@@ -2,7 +2,7 @@
 - name: Converge
   hosts: all
   roles:
-    - role: backup
+    - role: ansible-role-backup
       backup_services:
         - name: files
           script: files.sh
