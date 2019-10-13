@@ -1,0 +1,79 @@
+---
+backup_user: backupd
+backup_group: backupd
+
+# Add user to secondary groups if needed
+backup_extra_groups: []
+
+backup_home_dir: "/home/{{ backup_user }}"
+
+# Directory storing backup scripts.
+backup_scripts_dir: "{{ backup_home_dir }}/scripts"
+
+# Directory used to create temporary files needed
+# during backup process.
+backup_temp_dir: "{{ backup_home_dir }}/temp"
+
+backup_dependencies:
+  - cron
+  - gzip
+  - tar
+  - util-linux
+
+backup_compression_enabled: true
+backup_compressor: gzip
+backup_compression_level: 1
+
+backup_aws_upload_enabled: false
+backup_aws_bucket_name: mybucket
+backup_aws_region: us-east-1
+
+backup_gcloud_upload_enabled: false
+backup_gcloud_bucket_name: mybucket
+
+backup_cron_syslog_enabled: true
+backup_cron_syslog_tag: cron_backup_
+
+backup_services: []
+# - name: site-files
+#   script: files.sh
+#   vars:
+#     files_path: /var/www/site/data
+#   cron:
+#     day: 1
+#     hour: 6
+#     minute: 0
+# - name: site-mysql
+#   script: mysqldump.sh
+#   vars:
+#     mysql_user: backup
+#     mysql_password: backup
+#     mysql_endpoint: localhost
+#     mysql_databases:
+#       - site
+#   cron:
+#     hour: "*/6"
+#     minute: 30
+# - name: photos-bucket
+#   script: s3_bucket.sh
+#   vars:
+#     bucket_name: photos
+#     s3_sync_path: "/mnt/photos-s3-mirror"
+#   cron:
+#     hour: 5
+#     minute: 20
+#     weekday: 0
+# - name: site-mongodb
+#   script: mongodump.sh
+#   vars:
+#     mongodb_user: backup
+#     mongodb_password: backup
+#     mongodb_endpoint: localhost
+#   cron:
+#     hour: 7
+#     minute: 45
+# - name: site-mysql-xtrabackup
+#   script: xtrabackup.sh
+#   vars:
+#     mysql_user: backup
+#     mysql_password: backup

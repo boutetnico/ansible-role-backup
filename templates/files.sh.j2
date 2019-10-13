@@ -1,0 +1,61 @@
+#!/bin/bash
+
+# {{ ansible_managed }}
+
+set -o errexit   # abort on nonzero exitstatus
+set -o nounset   # abort on unbound variable
+set -o pipefail  # don't hide errors within pipes
+
+SERVICE={{ item.name }}
+FILES_PATH={{ item.vars.files_path }}
+DATE=$(date +%Y%m%d)
+DEST_FILE={{ backup_temp_dir }}/${SERVICE}-${DATE}.tar
+
+finish() {
+  result=$?
+
+  rm -rf ${DEST_FILE}
+
+  exit ${result}
+}
+
+trap finish EXIT ERR
+
+prepare() {
+  umask 027
+
+  # Check emptiness
+  if [ ! "$(ls -A ${FILES_PATH})" ]; then
+    echo "Error: empty backup" 1>&2
+    exit 1
+  fi
+}
+
+compress() {
+{% if backup_compression_enabled %}
+  DEST_FILE=${DEST_FILE}.{{ backup_compressor[0:2] }}
+
+  echo "Compressing..."
+
+  tar -C ${FILES_PATH} -cf - . | {{ backup_compressor }} -{{ backup_compression_level }} > ${DEST_FILE}
+{% endif %}
+}
+
+upload() {
+{% if backup_aws_upload_enabled %}
+  echo "Uploading to AWS..."
+
+  aws s3 --region {{ backup_aws_region }} \
+        cp --only-show-errors \
+        ${DEST_FILE} s3://{{ backup_aws_bucket_name }}/${SERVICE}/
+{% endif %}
+{% if backup_gcloud_upload_enabled %}
+  echo "Uploading to GCloud..."
+
+  gsutil cp ${DEST_FILE} gs://{{ backup_gcloud_bucket_name }}/${SERVICE}/
+{% endif %}
+}
+
+prepare
+compress
+upload

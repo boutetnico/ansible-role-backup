@@ -1,0 +1,57 @@
+---
+- name: Create backup group
+  group:
+    name: "{{ backup_user }}"
+    state: present
+
+- name: Create backup user
+  user:
+    append: "{{ true if backup_extra_groups | length > 0 else false }}"
+    group: "{{ backup_user }}"
+    groups: "{{ backup_extra_groups }}"
+    home: "{{ backup_home_dir }}"
+    name: "{{ backup_group }}"
+    shell: /bin/bash
+    state: present
+
+- name: Ensure dependencies are installed
+  apt:
+    name: "{{ backup_dependencies }}"
+    state: present
+
+- name: Create required directories
+  file:
+    group: "{{ backup_group }}"
+    mode: 0750
+    owner: "{{ backup_user }}"
+    path: "{{ item }}"
+    state: directory
+  with_items:
+    - "{{ backup_scripts_dir }}"
+    - "{{ backup_temp_dir }}"
+
+- name: Install backup scripts
+  template:
+    dest: "{{ backup_scripts_dir }}/{{ item.name }}.sh"
+    group: "{{ backup_group }}"
+    mode: 0750
+    owner: "{{ backup_user }}"
+    src: "{{ item.script }}.j2"
+  with_items: "{{ backup_services }}"
+
+- name: Install cron jobs of backuped services
+  cron:
+    day: "{{ item.cron.day | d(omit) }}"
+    hour: "{{ item.cron.hour | d(omit) }}"
+    job: >
+      {{ backup_scripts_dir }}/{{ item.name }}.sh
+      {{ "2>&1 | /usr/bin/logger -t " ~ backup_cron_syslog_tag ~ item.name
+      if backup_cron_syslog_enabled else "" }}
+    minute: "{{ item.cron.minute | d(omit) }}"
+    name: "Backup {{ item.name }}"
+    state: present
+    weekday: "{{ item.cron.weekday | d(omit) }}"
+  with_items: "{{ backup_services }}"
+  when: item.cron is defined
+  become: true
+  become_user: "{{ backup_user }}"

@@ -1,0 +1,48 @@
+---
+- name: Converge
+  hosts: all
+  roles:
+    - role: backup
+      backup_services:
+        - name: files
+          script: files.sh
+          vars:
+            files_path: /var/www/site/data
+          cron:
+            day: 1
+            hour: 6
+            minute: 0
+        - name: mysql
+          script: mysqldump.sh
+          vars:
+            mysql_user: backup
+            mysql_password: backup
+            mysql_endpoint: localhost
+            mysql_databases:
+              - site
+          cron:
+            hour: "*/6"
+            minute: 30
+        - name: s3_bucket
+          script: s3_bucket.sh
+          vars:
+            bucket_name: photos
+            s3_sync_path: "/mnt/photos-s3-mirror"
+          cron:
+            hour: 5
+            minute: 20
+            weekday: 0
+        - name: mongodb
+          script: mongodump.sh
+          vars:
+            mongodb_user: backup
+            mongodb_password: backup
+            mongodb_endpoint: localhost
+          cron:
+            hour: 7
+            minute: 45
+        - name: xtrabackup
+          script: xtrabackup.sh
+          vars:
+            mysql_user: backup
+            mysql_password: backup
