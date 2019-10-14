@@ -48,8 +48,7 @@
     minute: "{{ item.cron.minute | d(omit) }}"
     name: "Backup {{ item.name }}"
     state: present
+    user: "{{ backup_user }}"
     weekday: "{{ item.cron.weekday | d(omit) }}"
   with_items: "{{ backup_services }}"
   when: item.cron is defined
-  become: true
-  become_user: "{{ backup_user }}"
