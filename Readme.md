@@ -29,6 +29,7 @@ Role Variables
 | backup_home_dir              | yes      | /home/{{ backup_user }}       | string    |                                             |
 | backup_scripts_dir           | yes      | {{ backup_home_dir }}/scripts | string    |                                             |
 | backup_temp_dir              | yes      | {{ backup_home_dir }}/temp    | string    |                                             |
+| backup_extra_dir             | yes      | []                            | list      | Create additional directories if needed     |
 | backup_dependencies          | yes      | [cron, gzip, tar, util-linux] | list      |                                             |
 | backup_compression_enabled   | yes      | true                          | bool      |                                             |
 | backup_compressor            | yes      | gzip                          | string    |                                             |

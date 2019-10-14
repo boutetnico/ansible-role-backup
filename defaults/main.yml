@@ -14,6 +14,10 @@ backup_scripts_dir: "{{ backup_home_dir }}/scripts"
 # during backup process.
 backup_temp_dir: "{{ backup_home_dir }}/temp"
 
+# Extra directories to create if needed
+backup_extra_dir: []
+# - /home/backup/storage
+
 backup_dependencies:
   - cron
   - gzip

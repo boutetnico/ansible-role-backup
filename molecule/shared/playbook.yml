@@ -3,6 +3,8 @@
   hosts: all
   roles:
     - role: ansible-role-backup
+      backup_extra_dir:
+        - /home/backupd/storage
       backup_services:
         - name: files
           script: files.sh

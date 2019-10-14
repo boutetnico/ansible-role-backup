@@ -26,9 +26,7 @@
     owner: "{{ backup_user }}"
     path: "{{ item }}"
     state: directory
-  with_items:
-    - "{{ backup_scripts_dir }}"
-    - "{{ backup_temp_dir }}"
+  loop: "{{ [backup_scripts_dir, backup_temp_dir, backup_extra_dir] | flatten }}"
 
 - name: Install backup scripts
   template:

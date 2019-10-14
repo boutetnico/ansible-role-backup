@@ -37,7 +37,8 @@ def test_packages_are_installed(host, name):
 
 @pytest.mark.parametrize('path,user,group,mode', [
   ('/home/backupd/scripts', 'backupd', 'backupd', 0o750),
-  ('/home/backupd/temp', 'backupd', 'backupd', 0o750)
+  ('/home/backupd/temp', 'backupd', 'backupd', 0o750),
+  ('/home/backupd/storage', 'backupd', 'backupd', 0o750)
 ])
 def test_directories_exist(host, path, user, group, mode):
     directory = host.file(path)
