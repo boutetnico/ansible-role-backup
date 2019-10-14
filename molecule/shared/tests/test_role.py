@@ -27,8 +27,10 @@ def test_backup_user_exists(host, user, group, home):
 
 
 @pytest.mark.parametrize('name', [
+  ('cron'),
+  ('gzip'),
   ('tar'),
-  ('gzip')
+  ('util-linux')
 ])
 def test_packages_are_installed(host, name):
     package = host.package(name)
