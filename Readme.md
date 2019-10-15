@@ -54,7 +54,53 @@ Example Playbook
 
     - hosts: all
       roles:
-         - ansible-role-backup
+        - ansible-role-backup
+          backup_aws_upload_enabled: true
+          backup_aws_bucket_name: backup
+          backup_aws_region: us-east-1
+          backup_services:
+            - name: site-files
+              script: files.sh
+              vars:
+                files_path: /var/www/site/data
+              cron:
+                day: 1
+                hour: 6
+                minute: 0
+            - name: site-mysql
+              script: mysqldump.sh
+              vars:
+                mysql_user: backup
+                mysql_password: backup
+                mysql_endpoint: localhost
+                mysql_databases:
+                  - site
+              cron:
+                hour: "*/6"
+                minute: 30
+            - name: photos-bucket
+              script: s3_bucket.sh
+              vars:
+                bucket_name: photos
+                s3_sync_path: "/mnt/photos-s3-mirror"
+              cron:
+                hour: 5
+                minute: 20
+                weekday: 0
+            - name: site-mongodb
+              script: mongodump.sh
+              vars:
+                mongodb_user: backup
+                mongodb_password: backup
+                mongodb_endpoint: localhost
+              cron:
+                hour: 7
+                minute: 45
+            - name: site-mysql-xtrabackup
+              script: xtrabackup.sh
+              vars:
+                mysql_user: backup
+                mysql_password: backup
 
 Testing
 -------
