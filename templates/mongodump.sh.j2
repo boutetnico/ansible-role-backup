@@ -31,11 +31,11 @@ prepare() {
   echo "Dumping MongoDB data..."
 
   mongodump --quiet \
-            --host ${MONGODB_ENDPOINT} \
-            --username ${MONGODB_USER} \
-            --password ${MONGODB_PASSWORD} \
+            --host=${MONGODB_ENDPOINT} \
+            --username=${MONGODB_USER} \
+            --password=${MONGODB_PASSWORD} \
             --oplog \
-            --out ${DEST_DIR}
+            --out=${DEST_DIR}
 
   # Check emptiness
   if [ ! "$(ls -A ${DEST_DIR})" ]; then
