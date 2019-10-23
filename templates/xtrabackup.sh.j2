@@ -18,6 +18,10 @@ finish() {
 
   rm -rf ${DEST_DIR} ${DEST_FILE}
 
+  if [ ${result} -ne 0 ]; then
+    echo "Error: non-zero exit code $result" 1>&2
+  fi
+
   exit ${result}
 }
 
