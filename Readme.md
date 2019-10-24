@@ -26,7 +26,7 @@ Role Variables
 | backup_user                  | yes      | `backupd`                       | string    | User who runs backup scripts                |
 | backup_group                 | yes      | `backupd`                       | string    |                                             |
 | backup_extra_groups          | yes      | `[]`                            | list      | Add `backup_user` to additional groups      |
-| backup_home_dir              | yes      | `/home/{{ backup_user }}`       | string    |                                             |
+| backup_home_dir              | yes      | `/home/{{ backup_user }}`       | string    |                                             |
 | backup_scripts_dir           | yes      | `{{ backup_home_dir }}/scripts` | string    |                                             |
 | backup_temp_dir              | yes      | `{{ backup_home_dir }}/temp`    | string    |                                             |
 | backup_extra_dir             | yes      | `[]`                            | list      | Create additional directories if needed     |

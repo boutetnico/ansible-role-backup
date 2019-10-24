@@ -5,7 +5,7 @@ backup_group: backupd
 # Add user to secondary groups if needed
 backup_extra_groups: []
 
-backup_home_dir: "/home/{{ backup_user }}"
+backup_home_dir: "/home/{{ backup_user }}"
 
 # Directory storing backup scripts.
 backup_scripts_dir: "{{ backup_home_dir }}/scripts"
