@@ -11,6 +11,10 @@ FILES_PATH={{ item.vars.files_path }}
 DATE=$(date +%Y%m%d)
 DEST_FILE={{ backup_temp_dir }}/${SERVICE}-${DATE}.tar
 
+{% for item in backup_env %}
+export {{ item }}
+{% endfor %}
+
 finish() {
   result=$?
 
@@ -36,27 +40,46 @@ prepare() {
 }
 
 compress() {
-{% if backup_compression_enabled %}
+{% if item.vars.compression_enabled | d(backup_compression_enabled) %}
   DEST_FILE=${DEST_FILE}.{{ backup_compressor[0:2] }}
 
   echo "Compressing..."
 
   tar -C ${FILES_PATH} -cf - . | {{ backup_compressor }} -{{ backup_compression_level }} > ${DEST_FILE}
+{% else %}
+  echo "Skipping compression..."
 {% endif %}
 }
 
 upload() {
-{% if backup_aws_upload_enabled %}
+{% if item.vars.aws_upload_enabled | d(backup_aws_upload_enabled) %}
   echo "Uploading to AWS..."
 
   aws s3 --region {{ backup_aws_region }} \
         cp --only-show-errors \
         ${DEST_FILE} s3://{{ backup_aws_bucket_name }}/${SERVICE}/
 {% endif %}
-{% if backup_gcloud_upload_enabled %}
+
+{% if item.vars.gcloud_upload_enabled | d(backup_gcloud_upload_enabled) %}
   echo "Uploading to GCloud..."
 
   gsutil cp ${DEST_FILE} gs://{{ backup_gcloud_bucket_name }}/${SERVICE}/
+{% endif %}
+
+{% if item.vars.restic_enabled | d(backup_restic_enabled) %}
+  restic --quiet snapshots > /dev/null || restic --quiet init
+
+  echo "Performing backup through restic..."
+
+  restic --quiet backup ${FILES_PATH} --tag ${SERVICE}
+
+  echo "Forgetting old restic snapshots..."
+
+  restic --quiet forget --tag ${SERVICE} {{ backup_restic_forget_options }}
+
+  echo "Checking restic data..."
+
+  restic --quiet check
 {% endif %}
 }
 

@@ -24,6 +24,12 @@ backup_dependencies:
   - tar
   - util-linux
 
+# Add environnement variables to backup scripts
+backup_env: []
+# - PATH="$PATH:/usr/local/bin"
+# - RESTIC_REPOSITORY=/srv/restic-repo
+# - RESTIC_PASSWORD=_secret_
+
 backup_compression_enabled: true
 backup_compressor: gzip
 backup_compression_level: 1
@@ -34,6 +40,9 @@ backup_aws_region: us-east-1
 
 backup_gcloud_upload_enabled: false
 backup_gcloud_bucket_name: mybucket
+
+backup_restic_enabled: false
+backup_restic_forget_options: --keep-daily 90 --prune
 
 backup_cron_syslog_enabled: true
 backup_cron_syslog_tag: cron_backup_
@@ -81,3 +90,13 @@ backup_services: []
 #   vars:
 #     mysql_user: backup
 #     mysql_password: backup
+# - name: logs-bucket
+#   script: s3_bucket.sh
+#   vars:
+#     bucket_name: logs
+#     s3_sync_path: "/mnt/logs-s3-mirror"
+#     restic_enabled: true
+#     compression_enabled: false
+#   cron:
+#     hour: 14
+#     minute: 30

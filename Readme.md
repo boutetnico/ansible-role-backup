@@ -31,6 +31,7 @@ Role Variables
 | backup_temp_dir              | yes      | `{{ backup_home_dir }}/temp`    | string    |                                             |
 | backup_extra_dir             | yes      | `[]`                            | list      | Create additional directories if needed     |
 | backup_dependencies          | yes      | `[cron, gzip, tar, util-linux]` | list      |                                             |
+| backup_env                   | yes      | `[]`                            | list      |                                             |
 | backup_compression_enabled   | yes      | `true`                          | bool      |                                             |
 | backup_compressor            | yes      | `gzip`                          | string    |                                             |
 | backup_compression_level     | yes      | `1`                             | int       |                                             |
@@ -39,6 +40,8 @@ Role Variables
 | backup_aws_region            | yes      | `us-east-1`                     | string    |                                             |
 | backup_gcloud_upload_enabled | yes      | `false`                         | bool      |                                             |
 | backup_gcloud_bucket_name    | yes      | `mybucket`                      | string    |                                             |
+| backup_restic_enabled        | yes      | `false`                         | bool      |                                             |
+| backup_restic_forget_options | yes      | `--keep-daily 90 --prune`       | string    | See (all options)[https://restic.readthedocs.io/en/latest/060_forget.html#removing-snapshots-according-to-a-policy].                                            |
 | backup_cron_syslog_enabled   | yes      | `true`                          | bool      | Log script output to syslog                 |
 | backup_cron_syslog_tag       | yes      | `cron_backup_`                  | string    |                                             |
 | backup_services              | yes      | `[]`                            | list      | Scripts to install. See `defaults/main.yml` |
@@ -48,6 +51,7 @@ Dependencies
 
 `backup_aws_*` options require `awscli` package.
 `backup_gcloud_*` options require `gcloud` package.
+`backup_restic_*` options require [`restic` package](https://github.com/boutetnico/ansible-role-restic).
 
 Example Playbook
 ----------------
@@ -101,6 +105,16 @@ Example Playbook
               vars:
                 mysql_user: backup
                 mysql_password: backup
+            - name: logs-bucket
+              script: s3_bucket.sh
+              vars:
+                bucket_name: logs
+                s3_sync_path: "/mnt/logs-s3-mirror"
+                restic_enabled: true
+                compression_enabled: false
+              cron:
+                hour: 14
+                minute: 30
 
 Testing
 -------
