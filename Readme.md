@@ -41,7 +41,8 @@ Role Variables
 | backup_gcloud_upload_enabled | yes      | `false`                         | bool      |                                             |
 | backup_gcloud_bucket_name    | yes      | `mybucket`                      | string    |                                             |
 | backup_restic_enabled        | yes      | `false`                         | bool      |                                             |
-| backup_restic_forget_options | yes      | `--keep-daily 90 --prune`       | string    | See (all options)[https://restic.readthedocs.io/en/latest/060_forget.html#removing-snapshots-according-to-a-policy].                                            |
+| backup_restic_forget_options | yes      | `--keep-daily 90 --prune`       | string    | See (all options)[https://restic.readthedocs.io/en/latest/060_forget.html#removing-snapshots-according-to-a-policy]. |
+| backup_restic_check_enabled  | yes      | `false`                         | bool      |                                             |
 | backup_cron_syslog_enabled   | yes      | `true`                          | bool      | Log script output to syslog                 |
 | backup_cron_syslog_tag       | yes      | `cron_backup_`                  | string    |                                             |
 | backup_services              | yes      | `[]`                            | list      | Scripts to install. See `defaults/main.yml` |
@@ -111,6 +112,7 @@ Example Playbook
                 bucket_name: logs
                 s3_sync_path: "/mnt/logs-s3-mirror"
                 restic_enabled: true
+                restic_check_enabled: true
                 compression_enabled: false
               cron:
                 hour: 14

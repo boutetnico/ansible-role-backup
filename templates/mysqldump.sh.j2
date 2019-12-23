@@ -92,9 +92,11 @@ upload() {
 
   restic --quiet forget --tag ${SERVICE} {{ backup_restic_forget_options }}
 
+{%   if item.vars.restic_check_enabled | d(backup_restic_check_enabled) %}
   echo "Checking restic data..."
 
   restic --quiet check
+{%   endif %}
 {% endif %}
 }
 

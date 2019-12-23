@@ -43,6 +43,7 @@ backup_gcloud_bucket_name: mybucket
 
 backup_restic_enabled: false
 backup_restic_forget_options: --keep-daily 90 --prune
+backup_restic_check_enabled: false
 
 backup_cron_syslog_enabled: true
 backup_cron_syslog_tag: cron_backup_
