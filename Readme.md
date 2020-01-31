@@ -48,9 +48,9 @@ Role Variables
 Dependencies
 ------------
 
-`backup_aws_*` options require `awscli` package.
-`backup_gcloud_*` options require `gcloud` package.
-`backup_restic_*` options require [`restic` package](https://github.com/boutetnico/ansible-role-restic).
+- `backup_aws_*` options require `awscli` package.
+- `backup_gcloud_*` options require `gcloud` package.
+- `backup_restic_*` options require [`restic` package](https://github.com/boutetnico/ansible-role-restic).
 
 Example Playbook
 ----------------
