@@ -24,6 +24,8 @@ finish() {
 
   if [ ${result} -ne 0 ]; then
     echo "Error: non-zero exit code $result" 1>&2
+  else
+    echo "Backup completed"
   fi
 
   exit ${result}

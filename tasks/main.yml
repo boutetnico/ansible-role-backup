@@ -1,10 +1,10 @@
 ---
-- name: Create backup group
+- name: Ensure backup group exists
   group:
-    name: "{{ backup_user }}"
+    name: "{{ backup_group }}"
     state: present
 
-- name: Create backup user
+- name: Ensure backup user exists
   user:
     append: "{{ true if backup_extra_groups | length > 0 else false }}"
     group: "{{ backup_user }}"
@@ -13,6 +13,7 @@
     name: "{{ backup_group }}"
     shell: /bin/bash
     state: present
+  when: backup_group != 'root'
 
 - name: Ensure dependencies are installed
   apt:
