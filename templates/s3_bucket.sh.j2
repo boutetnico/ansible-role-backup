@@ -57,10 +57,12 @@ compress() {
   echo "Creating a compressed archive..."
 
   tar -C ${S3_SYNC_PATH} {{ item.vars.tar_options | d('') }} -cf - . | {{ backup_compressor }} -{{ backup_compression_level }} > ${DEST_FILE}
-{% else %}
+{% elif item.vars.archive_enabled | d(backup_archive_enabled) %}
   echo "Creating an uncompressed archive..."
 
   tar -C ${S3_SYNC_PATH} {{ item.vars.tar_options | d('') }} -cf ${DEST_FILE} .
+{% else %}
+  echo "Skipping archiving and compressing..."
 {% endif %}
 }
 
