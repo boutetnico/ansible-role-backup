@@ -10,6 +10,7 @@
           script: files.sh
           vars:
             files_path: /var/www/site/data
+            tar_options: '--exclude ./path'
           cron:
             day: 1
             hour: 6

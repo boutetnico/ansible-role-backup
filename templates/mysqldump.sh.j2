@@ -64,11 +64,11 @@ compress() {
 
   echo "Creating a compressed archive..."
 
-  tar -C ${DEST_DIR} -cf - . | {{ backup_compressor }} -{{ backup_compression_level }} > ${DEST_FILE}
+  tar -C ${DEST_DIR} {{ item.vars.tar_options | d('') }} -cf - . | {{ backup_compressor }} -{{ backup_compression_level }} > ${DEST_FILE}
 {% else %}
   echo "Creating an uncompressed archive..."
 
-  tar -C ${DEST_DIR} -cf ${DEST_FILE} .
+  tar -C ${DEST_DIR} {{ item.vars.tar_options | d('') }} -cf ${DEST_FILE} .
 {% endif %}
 }
 
