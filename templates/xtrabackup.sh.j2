@@ -37,6 +37,8 @@ prepare() {
   umask 027
   mkdir -p ${DEST_DIR}
 
+  echo "Starting backup..."
+
   echo "Dumping MySQL data 1/2..."
   xtrabackup --backup \
              --user=${MYSQL_USER} \
@@ -61,11 +63,13 @@ compress() {
 {% if item.vars.compression_enabled | d(backup_compression_enabled) %}
   DEST_FILE=${DEST_FILE}.{{ backup_compressor[0:2] }}
 
-  echo "Compressing..."
+  echo "Creating a compressed archive..."
 
   tar -C ${DEST_DIR} -cf - . | {{ backup_compressor }} -{{ backup_compression_level }} > ${DEST_FILE}
 {% else %}
-  echo "Skipping compression..."
+  echo "Creating an uncompressed archive..."
+
+  tar -C ${DEST_DIR} -cf ${DEST_FILE} .
 {% endif %}
 }
 

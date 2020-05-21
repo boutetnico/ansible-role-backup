@@ -35,6 +35,8 @@ trap finish EXIT ERR
 prepare() {
   umask 027
 
+  echo "Starting backup..."
+
   echo "Syncing remote bucket with local copy..."
 
   aws s3 sync --delete \
@@ -52,11 +54,13 @@ compress() {
 {% if item.vars.compression_enabled | d(backup_compression_enabled) %}
   DEST_FILE=${DEST_FILE}.{{ backup_compressor[0:2] }}
 
-  echo "Compressing..."
+  echo "Creating a compressed archive..."
 
   tar -C ${S3_SYNC_PATH} -cf - . | {{ backup_compressor }} -{{ backup_compression_level }} > ${DEST_FILE}
 {% else %}
-  echo "Skipping compression..."
+  echo "Creating an uncompressed archive..."
+
+  tar -C ${S3_SYNC_PATH} -cf ${DEST_FILE} .
 {% endif %}
 }
 
