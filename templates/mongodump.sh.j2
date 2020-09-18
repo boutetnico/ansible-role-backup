@@ -15,7 +15,7 @@ MONGODB_USER={{ item.vars.mongodb_user }}
 MONGODB_PASSWORD={{ item.vars.mongodb_password }}
 
 {% for item in backup_env %}
-export {{ item }}
+export {{ item }}
 {% endfor %}
 
 finish() {

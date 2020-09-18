@@ -12,7 +12,7 @@ DATE=$(date +%Y%m%d)
 DEST_FILE={{ backup_temp_dir }}/${SERVICE}-${DATE}.tar
 
 {% for item in backup_env %}
-export {{ item }}
+export {{ item }}
 {% endfor %}
 
 finish() {

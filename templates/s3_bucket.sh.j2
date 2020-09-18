@@ -13,7 +13,7 @@ BUCKET_NAME={{ item.vars.bucket_name }}
 S3_SYNC_PATH={{ item.vars.s3_sync_path }}
 
 {% for item in backup_env %}
-export {{ item }}
+export {{ item }}
 {% endfor %}
 
 finish() {

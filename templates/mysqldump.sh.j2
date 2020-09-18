@@ -16,7 +16,7 @@ MYSQL_USER={{ item.vars.mysql_user }}
 MYSQL_PASSWORD={{ item.vars.mysql_password }}
 
 {% for item in backup_env %}
-export {{ item }}
+export {{ item }}
 {% endfor %}
 
 finish() {
