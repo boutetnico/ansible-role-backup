@@ -8,7 +8,7 @@ set -o pipefail  # don't hide errors within pipes
 
 SERVICE={{ item.name }}
 FILES_PATH={{ item.vars.files_path }}
-DATE=$(date +%Y%m%d)
+DATE=$(date +%Y%m%dT%H%M%S)
 DEST_FILE={{ backup_temp_dir }}/${SERVICE}-${DATE}.tar
 
 {% for item in backup_env %}

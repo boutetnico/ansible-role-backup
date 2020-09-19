@@ -7,7 +7,7 @@ set -o nounset   # abort on unbound variable
 set -o pipefail  # don't hide errors within pipes
 
 SERVICE={{ item.name }}
-DATE=$(date +%Y%m%d)
+DATE=$(date +%Y%m%dT%H%M%S)
 DEST_FILE={{ backup_temp_dir }}/${SERVICE}-${DATE}.tar
 BUCKET_NAME={{ item.vars.bucket_name }}
 S3_SYNC_PATH={{ item.vars.s3_sync_path }}

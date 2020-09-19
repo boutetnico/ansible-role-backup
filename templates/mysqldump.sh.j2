@@ -7,7 +7,7 @@ set -o nounset   # abort on unbound variable
 set -o pipefail  # don't hide errors within pipes
 
 SERVICE={{ item.name }}
-DATE=$(date +%Y%m%d)
+DATE=$(date +%Y%m%dT%H%M%S)
 DEST_DIR={{ backup_temp_dir }}/${SERVICE}-${DATE}
 DEST_FILE={{ backup_temp_dir }}/${SERVICE}-${DATE}.tar
 MYSQL_DATABASES=({{ item.vars.mysql_databases | join(' ') }})
