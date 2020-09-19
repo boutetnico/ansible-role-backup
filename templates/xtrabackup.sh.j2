@@ -87,7 +87,7 @@ upload() {
 {% if item.vars.gcloud_upload_enabled | d(backup_gcloud_upload_enabled) %}
   echo "Uploading to GCloud..."
 
-  gsutil cp ${DEST_FILE} gs://{{ backup_gcloud_bucket_name }}/${SERVICE}/
+  gsutil -q cp ${DEST_FILE} gs://{{ backup_gcloud_bucket_name }}/${SERVICE}/
 {% endif %}
 
 {% if item.vars.restic_enabled | d(backup_restic_enabled) %}
