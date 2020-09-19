@@ -1,0 +1,136 @@
+#!/bin/bash
+
+# {{ ansible_managed }}
+
+set -o errexit   # abort on nonzero exitstatus
+set -o nounset   # abort on unbound variable
+set -o pipefail  # don't hide errors within pipes
+
+SERVICE={{ item.name }}
+DATE=$(date +%Y%m%dT%H%M%S)
+DEST_DIR={{ backup_temp_dir }}/${SERVICE}-${DATE}
+DEST_FILE={{ backup_temp_dir }}/${SERVICE}-${DATE}.tar
+MYSQL_CONTAINER_NAME={{ item.vars.mysql_container_name }}
+MYSQL_NETWORK_NAME={{ item.vars.mysql_network_name }}
+MYSQL_HOST={{ item.vars.mysql_host }}
+MYSQL_USER={{ item.vars.mysql_user }}
+MYSQL_PASSWORD={{ item.vars.mysql_password }}
+MARIABACKUP_DOCKER_IMAGE={{ item.vars.mariabackup_docker_image }}
+MARIABACKUP_OPTIONS={{ item.vars.mariabackup_options }}
+
+{% for item in backup_env %}
+export {{ item }}
+{% endfor %}
+
+finish() {
+  result=$?
+
+  rm -rf ${DEST_DIR} ${DEST_FILE}
+
+  if [ ${result} -ne 0 ]; then
+    echo "Error: non-zero exit code $result" 1>&2
+  else
+    echo "Backup completed"
+  fi
+
+  exit ${result}
+}
+
+trap finish EXIT ERR
+
+prepare() {
+  umask 027
+  mkdir -p ${DEST_DIR}
+
+  echo "Starting backup..."
+
+  echo "Dumping MySQL data 1/2..."
+  docker run -i \
+             --link ${MYSQL_CONTAINER_NAME} \
+             --net ${MYSQL_NETWORK_NAME} \
+             --volumes-from ${MYSQL_CONTAINER_NAME}:ro \
+             -v ${DEST_DIR}:/target \
+             --rm \
+             ${MARIABACKUP_IMAGE_NAME} \
+             mariabackup --backup \
+                         --host ${MYSQL_HOST} \
+                         --user ${MYSQL_USER} \
+                         --password ${MYSQL_PASSWORD} \
+                         ${MARIABACKUP_DOCKER_IMAGE} \
+                         --target-dir=/target &> /dev/null
+
+  echo "Dumping MySQL data 2/2..."
+  docker run -i \
+             --link ${MYSQL_CONTAINER_NAME} \
+             --net ${MYSQL_NETWORK_NAME} \
+             --volumes-from ${MYSQL_CONTAINER_NAME}:ro \
+             -v ${DEST_DIR}:/target \
+             --rm \
+             ${MARIABACKUP_IMAGE_NAME} \
+             mariabackup --prepare \
+                         --host ${MYSQL_HOST} \
+                         --user ${MYSQL_USER} \
+                         --password ${MYSQL_PASSWORD} \
+                         ${MARIABACKUP_DOCKER_IMAGE} \
+                         --target-dir=/target &> /dev/null
+
+  # Check emptiness
+  if [ ! "$(ls -A ${DEST_DIR})" ]; then
+    echo "Error: empty backup" 1>&2
+    exit 1
+  fi
+}
+
+compress() {
+{% if item.vars.compression_enabled | d(backup_compression_enabled) %}
+  DEST_FILE=${DEST_FILE}.{{ backup_compressor[0:2] }}
+
+  echo "Creating a compressed archive..."
+
+  tar -C ${DEST_DIR} {{ item.vars.tar_options | d('') }} -cf - . | {{ backup_compressor }} -{{ backup_compression_level }} > ${DEST_FILE}
+{% elif item.vars.archive_enabled | d(backup_archive_enabled) %}
+  echo "Creating an uncompressed archive..."
+
+  tar -C ${DEST_DIR} {{ item.vars.tar_options | d('') }} -cf ${DEST_FILE} .
+{% else %}
+  echo "Skipping archiving and compressing..."
+{% endif %}
+}
+
+upload() {
+{% if item.vars.aws_upload_enabled | d(backup_aws_upload_enabled) %}
+  echo "Uploading to AWS..."
+
+  aws s3 --region {{ backup_aws_region }} \
+        cp --only-show-errors \
+        ${DEST_FILE} s3://{{ backup_aws_bucket_name }}/${SERVICE}/
+{% endif %}
+
+{% if item.vars.gcloud_upload_enabled | d(backup_gcloud_upload_enabled) %}
+  echo "Uploading to GCloud..."
+
+  gsutil -q cp ${DEST_FILE} gs://{{ backup_gcloud_bucket_name }}/${SERVICE}/
+{% endif %}
+
+{% if item.vars.restic_enabled | d(backup_restic_enabled) %}
+  restic --quiet snapshots > /dev/null || restic --quiet init
+
+  echo "Performing backup through restic..."
+
+  restic --quiet backup ${DEST_DIR} --tag ${SERVICE}
+
+  echo "Forgetting old restic snapshots..."
+
+  restic --quiet forget --tag ${SERVICE} {{ backup_restic_forget_options }}
+
+{%   if item.vars.restic_check_enabled | d(backup_restic_check_enabled) %}
+  echo "Checking restic data..."
+
+  restic --quiet check
+{%   endif %}
+{% endif %}
+}
+
+prepare
+compress
+upload

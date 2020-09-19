@@ -117,6 +117,19 @@ Example Playbook
               cron:
                 hour: 14
                 minute: 30
+            - name: docker_mariabackup
+              script: docker_mariabackup.sh
+              vars:
+                mysql_container_name: project_mysql_1
+                mysql_network_name: project_backend
+                mysql_host: mysql
+                mysql_user: backup
+                mysql_password: backup
+                mariabackup_docker_image: mariadb:latest
+                mariabackup_options: --no-lock
+              cron:
+                hour: "*/1"
+                minute: 27
 
 Testing
 -------
