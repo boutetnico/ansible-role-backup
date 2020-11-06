@@ -12,6 +12,8 @@ DEST_DIR={{ backup_temp_dir }}/${SERVICE}-${DATE}
 DEST_FILE={{ backup_temp_dir }}/${SERVICE}-${DATE}.tar
 MYSQL_USER={{ item.vars.mysql_user }}
 MYSQL_PASSWORD={{ item.vars.mysql_password }}
+XTRABACKUP_BACKUP_OPTIONS="{{ item.vars.xtrabackup_backup_options | d('') }}"
+XTRABACKUP_PREPARE_OPTIONS="{{ item.vars.xtrabackup_prepare_options | d('') }}"
 
 {% for item in backup_env %}
 export {{ item }}
@@ -43,14 +45,15 @@ prepare() {
   xtrabackup --backup \
              --user=${MYSQL_USER} \
              --password=${MYSQL_PASSWORD} \
-             --target-dir=${DEST_DIR}/ &> /dev/null
+             --target-dir=${DEST_DIR}/ \
+             ${XTRABACKUP_BACKUP_OPTIONS} &> /dev/null
 
   echo "Dumping MySQL data 2/2..."
   xtrabackup --prepare \
              --user=${MYSQL_USER} \
-            --password=${MYSQL_PASSWORD} \
-            --use-memory=1G \
-            --target-dir=${DEST_DIR}/ &> /dev/null
+             --password=${MYSQL_PASSWORD} \
+             --target-dir=${DEST_DIR}/ \
+             ${XTRABACKUP_PREPARE_OPTIONS} &> /dev/null
 
   # Check emptiness
   if [ ! "$(ls -A ${DEST_DIR})" ]; then
