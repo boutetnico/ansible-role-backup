@@ -49,6 +49,8 @@
           vars:
             mysql_user: backup
             mysql_password: backup
+            xtrabackup_backup_options: --slave-info
+            xtrabackup_prepare_options: --use-memory=1G
         - name: docker_mariabackup
           script: docker_mariabackup.sh
           vars:

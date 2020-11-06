@@ -105,6 +105,8 @@ Example Playbook
               vars:
                 mysql_user: backup
                 mysql_password: backup
+                xtrabackup_backup_options: --slave-info
+                xtrabackup_prepare_options: --use-memory=1G
             - name: logs-bucket
               script: s3_bucket.sh
               vars:

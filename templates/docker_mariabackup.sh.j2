@@ -16,7 +16,7 @@ MYSQL_HOST={{ item.vars.mysql_host }}
 MYSQL_USER={{ item.vars.mysql_user }}
 MYSQL_PASSWORD={{ item.vars.mysql_password }}
 MARIABACKUP_DOCKER_IMAGE={{ item.vars.mariabackup_docker_image }}
-MARIABACKUP_OPTIONS={{ item.vars.mariabackup_options }}
+MARIABACKUP_OPTIONS="{{ item.vars.mariabackup_options | d('') }}"
 
 {% for item in backup_env %}
 export {{ item }}
