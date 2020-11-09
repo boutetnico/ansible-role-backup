@@ -1,5 +1,6 @@
 ---
 galaxy_info:
+  role_name: backup
   author: Nicolas Boutet
   description: Configure backups
   license: MIT
@@ -15,4 +16,11 @@ galaxy_info:
         - buster
   galaxy_tags:
     - backup
+    - gcloud
+    - mariabackup
+    - mongodb
+    - mysql
+    - restic
+    - s3
+    - xtrabackup
 dependencies: []
