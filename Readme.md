@@ -1,6 +1,9 @@
 ansible-role-backup
 ===================
 
+![tests](https://github.com/boutetnico/ansible-role-backup/workflows/Test%20ansible%20role/badge.svg)
+![Ansible Role](https://img.shields.io/ansible/role/51715)
+
 This role configures backups.
 
 Requirements
