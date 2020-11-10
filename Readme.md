@@ -1,8 +1,8 @@
+[![tests](https://github.com/boutetnico/ansible-role-backup/workflows/Test%20ansible%20role/badge.svg)](https://github.com/boutetnico/ansible-role-backup/actions?query=workflow%3A%22Test+ansible+role%22)
+[![Ansible Galaxy](https://img.shields.io/badge/galaxy-boutetnico.backup-blue.svg)](https://galaxy.ansible.com/boutetnico/backup)
+
 ansible-role-backup
 ===================
-
-![tests](https://github.com/boutetnico/ansible-role-backup/workflows/Test%20ansible%20role/badge.svg)
-![Ansible Role](https://img.shields.io/ansible/role/51715)
 
 This role configures backups.
 
