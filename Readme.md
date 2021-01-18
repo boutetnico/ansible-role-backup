@@ -135,6 +135,14 @@ Example Playbook
               cron:
                 hour: "*/1"
                 minute: 27
+            - name: influxdb
+              script: influxdb.sh
+              vars:
+                influxdb_host: localhost:8086
+                influxdb_token: influxdb-root-token-created-at-setup
+              cron:
+                hour: 21
+                minute: 06
 
 Testing
 -------
