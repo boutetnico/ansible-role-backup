@@ -56,7 +56,8 @@ def test_directories_exist(host, path, user, group, mode):
   ('/home/backupd/scripts/mysql.sh', 'backupd', 'backupd', 0o750),
   ('/home/backupd/scripts/s3_bucket.sh', 'backupd', 'backupd', 0o750),
   ('/home/backupd/scripts/mongodb.sh', 'backupd', 'backupd', 0o750),
-  ('/home/backupd/scripts/xtrabackup.sh', 'backupd', 'backupd', 0o750)
+  ('/home/backupd/scripts/xtrabackup.sh', 'backupd', 'backupd', 0o750),
+  ('/home/backupd/scripts/influxdb.sh', 'backupd', 'backupd', 0o750)
 ])
 def test_scripts_exist(host, path, user, group, mode):
     directory = host.file(path)
@@ -75,7 +76,9 @@ def test_scripts_exist(host, path, user, group, mode):
   ('20 5 * * 0 /home/backupd/scripts/s3_bucket.sh 2>&1 | \
 /usr/bin/logger -t cron_backup_s3_bucket', 'backupd'),
   ('45 7 * * * /home/backupd/scripts/mongodb.sh 2>&1 | \
-/usr/bin/logger -t cron_backup_mongodb', 'backupd')
+/usr/bin/logger -t cron_backup_mongodb', 'backupd'),
+  ('6 21 * * * /home/backupd/scripts/influxdb.sh 2>&1 | \
+/usr/bin/logger -t cron_backup_influxdb', 'backupd')
 ])
 def test_cron_jobs_exist(host, job, user):
     jobs = host.check_output('crontab -u ' + user + ' -l')
