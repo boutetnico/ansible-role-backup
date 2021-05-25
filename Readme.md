@@ -42,6 +42,8 @@ Role Variables
 | backup_aws_region            | yes      | `us-east-1`                     | string  |                                             |
 | backup_gcloud_upload_enabled | yes      | `false`                         | bool    |                                             |
 | backup_gcloud_bucket_name    | yes      | `mybucket`                      | string  |                                             |
+| backup_b2_upload_enabled     | yes      | `false`                         | bool    | Enable Backblaze B2 upload.                 |
+| backup_b2_bucket_name        | yes      | `mybucket`                      | string  | Backblaze B2 bucket name.                   |
 | backup_restic_enabled        | yes      | `false`                         | bool    |                                             |
 | backup_restic_forget_options | yes      | `--keep-daily 90 --prune`       | string  | See (all options)[https://restic.readthedocs.io/en/latest/060_forget.html#removing-snapshots-according-to-a-policy]. |
 | backup_restic_check_enabled  | yes      | `false`                         | bool    |                                             |
@@ -52,9 +54,10 @@ Role Variables
 Dependencies
 ------------
 
-- `backup_aws_*` options require `awscli` package.
+- `backup_aws_*` options require [`awscli` package](https://github.com/boutetnico/ansible-role-awscli).
 - `backup_gcloud_*` options require `gcloud` package.
 - `backup_restic_*` options require [`restic` package](https://github.com/boutetnico/ansible-role-restic).
+- `backup_b2_*` options require [`b2` package](https://github.com/boutetnico/ansible-role-b2).
 
 Example Playbook
 ----------------

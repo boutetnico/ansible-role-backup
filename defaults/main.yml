@@ -43,6 +43,9 @@ backup_aws_region: us-east-1
 backup_gcloud_upload_enabled: false
 backup_gcloud_bucket_name: mybucket
 
+backup_b2_upload_enabled: false
+backup_b2_bucket_name: mybucket
+
 backup_restic_enabled: false
 backup_restic_forget_options: --keep-daily 90 --prune
 backup_restic_check_enabled: false
