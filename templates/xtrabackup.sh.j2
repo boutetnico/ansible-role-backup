@@ -93,6 +93,18 @@ upload() {
   gsutil -q cp ${DEST_FILE} gs://{{ backup_gcloud_bucket_name }}/${SERVICE}/
 {% endif %}
 
+{% if item.vars.b2_upload_enabled | d(backup_b2_upload_enabled) %}
+  echo "Uploading to Backblaze B2..."
+
+  b2 upload-file \
+    --quiet \
+    --noProgress \
+    {{ backup_b2_bucket_name }} \
+    ${DEST_FILE} \
+    ${SERVICE}/$(basename ${DEST_FILE}) \
+    > /dev/null
+{% endif %}
+
 {% if item.vars.restic_enabled | d(backup_restic_enabled) %}
   restic --quiet snapshots > /dev/null || restic --quiet init
 
