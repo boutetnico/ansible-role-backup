@@ -51,12 +51,12 @@ prepare() {
              --volumes-from ${MYSQL_CONTAINER_NAME}:ro \
              -v ${DEST_DIR}:/target \
              --rm \
-             ${MARIABACKUP_IMAGE_NAME} \
+             ${MARIABACKUP_DOCKER_IMAGE} \
              mariabackup --backup \
                          --host ${MYSQL_HOST} \
                          --user ${MYSQL_USER} \
                          --password ${MYSQL_PASSWORD} \
-                         ${MARIABACKUP_DOCKER_IMAGE} \
+                         ${MARIABACKUP_OPTIONS} \
                          --target-dir=/target &> /dev/null
 
   echo "Dumping MySQL data 2/2..."
@@ -66,12 +66,12 @@ prepare() {
              --volumes-from ${MYSQL_CONTAINER_NAME}:ro \
              -v ${DEST_DIR}:/target \
              --rm \
-             ${MARIABACKUP_IMAGE_NAME} \
+             ${MARIABACKUP_DOCKER_IMAGE} \
              mariabackup --prepare \
                          --host ${MYSQL_HOST} \
                          --user ${MYSQL_USER} \
                          --password ${MYSQL_PASSWORD} \
-                         ${MARIABACKUP_DOCKER_IMAGE} \
+                         ${MARIABACKUP_OPTIONS} \
                          --target-dir=/target &> /dev/null
 
   # Check emptiness
