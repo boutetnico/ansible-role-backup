@@ -1,6 +1,7 @@
 ---
 galaxy_info:
   role_name: backup
+  namespace: boutetnico
   author: Nicolas Boutet
   description: Configure backups.
   license: MIT
