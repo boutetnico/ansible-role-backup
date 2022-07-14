@@ -41,6 +41,7 @@ prepare() {
 
   aws s3 sync --delete \
               --only-show-errors \
+              {{ item.vars.s3_sync_options | d('') }} \
               s3://${BUCKET_NAME}/ ${S3_SYNC_PATH}/
 
   # Check emptiness

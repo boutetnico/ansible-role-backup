@@ -93,6 +93,7 @@ Example Playbook
               vars:
                 bucket_name: photos
                 s3_sync_path: "/mnt/photos-s3-mirror"
+                s3_sync_options: "--follow-symlinks"
               cron:
                 hour: 5
                 minute: 20
