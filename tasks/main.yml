@@ -1,11 +1,11 @@
 ---
 - name: Ensure backup group exists
-  group:
+  ansible.builtin.group:
     name: "{{ backup_group }}"
     state: present
 
 - name: Ensure backup user exists
-  user:
+  ansible.builtin.user:
     append: "{{ true if backup_extra_groups | length > 0 else false }}"
     group: "{{ backup_user }}"
     groups: "{{ backup_extra_groups }}"
@@ -13,16 +13,16 @@
     name: "{{ backup_group }}"
     shell: /bin/bash
     state: present
-  when: backup_group != 'root'
+  when: backup_group != "root"
 
 - name: Ensure dependencies are installed
-  apt:
+  ansible.builtin.apt:
     name: "{{ backup_dependencies }}"
     state: present
     update_cache: true
 
 - name: Create required directories
-  file:
+  ansible.builtin.file:
     group: "{{ backup_group }}"
     mode: 0750
     owner: "{{ backup_user }}"
@@ -31,16 +31,18 @@
   loop: "{{ [backup_scripts_dir, backup_temp_dir, backup_extra_dir] | flatten }}"
 
 - name: Install backup scripts
-  template:
+  ansible.builtin.template:
     dest: "{{ backup_scripts_dir }}/{{ item.name }}.sh"
     group: "{{ backup_group }}"
     mode: 0750
     owner: "{{ backup_user }}"
     src: "{{ item.script }}.j2"
-  with_items: "{{ backup_services }}"
+  loop: "{{ backup_services }}"
+  loop_control:
+    label: "{{ item.name }}"
 
-- name: Install cron jobs of backuped services
-  cron:
+- name: Install cron jobs to run backup scripts
+  ansible.builtin.cron:
     day: "{{ item.cron.day | d(omit) }}"
     hour: "{{ item.cron.hour | d(omit) }}"
     job: >
@@ -52,5 +54,7 @@
     state: present
     user: "{{ backup_user }}"
     weekday: "{{ item.cron.weekday | d(omit) }}"
-  with_items: "{{ backup_services }}"
+  loop: "{{ backup_services }}"
+  loop_control:
+    label: "{{ item.name }}"
   when: item.cron is defined
