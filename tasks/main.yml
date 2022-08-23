@@ -13,7 +13,7 @@
     name: "{{ backup_group }}"
     shell: /bin/bash
     state: present
-  when: backup_group != 'root'
+  when: backup_group != "root"
 
 - name: Ensure dependencies are installed
   ansible.builtin.apt:
@@ -37,9 +37,11 @@
     mode: 0750
     owner: "{{ backup_user }}"
     src: "{{ item.script }}.j2"
-  with_items: "{{ backup_services }}"
+  loop: "{{ backup_services }}"
+  loop_control:
+    label: "{{ item.name }}"
 
-- name: Install cron jobs of backuped services
+- name: Install cron jobs to run backup scripts
   ansible.builtin.cron:
     day: "{{ item.cron.day | d(omit) }}"
     hour: "{{ item.cron.hour | d(omit) }}"
@@ -52,5 +54,7 @@
     state: present
     user: "{{ backup_user }}"
     weekday: "{{ item.cron.weekday | d(omit) }}"
-  with_items: "{{ backup_services }}"
+  loop: "{{ backup_services }}"
+  loop_control:
+    label: "{{ item.name }}"
   when: item.cron is defined
