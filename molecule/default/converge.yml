@@ -2,7 +2,7 @@
 - name: Converge
   hosts: all
   roles:
-    - role: ansible-role-backup
+    - role: boutetnico.backup
       backup_extra_dir:
         - /home/backupd/storage
       backup_services:
