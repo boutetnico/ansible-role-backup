@@ -72,4 +72,4 @@
             influxdb_token: influxdb-root-token-created-at-setup
           cron:
             hour: 21
-            minute: 06
+            minute: 6
