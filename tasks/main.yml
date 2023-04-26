@@ -24,7 +24,7 @@
 - name: Create required directories
   ansible.builtin.file:
     group: "{{ backup_group }}"
-    mode: 0750
+    mode: "0750"
     owner: "{{ backup_user }}"
     path: "{{ item }}"
     state: directory
@@ -34,7 +34,7 @@
   ansible.builtin.template:
     dest: "{{ backup_scripts_dir }}/{{ item.name }}.sh"
     group: "{{ backup_group }}"
-    mode: 0750
+    mode: "0750"
     owner: "{{ backup_user }}"
     src: "{{ item.script }}.j2"
   loop: "{{ backup_services }}"
