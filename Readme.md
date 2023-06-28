@@ -37,13 +37,17 @@ Role Variables
 | backup_compression_enabled   | yes      | `true`                          | bool    | Wether or not to compress the archive file  |
 | backup_compressor            | yes      | `gzip`                          | string  |                                             |
 | backup_compression_level     | yes      | `1`                             | int     |                                             |
+| backup_aws_command           | yes      | `aws`                           | string  |                                             |
 | backup_aws_upload_enabled    | yes      | `false`                         | bool    |                                             |
 | backup_aws_bucket_name       | yes      | `mybucket`                      | string  |                                             |
 | backup_aws_region            | yes      | `us-east-1`                     | string  |                                             |
+| backup_gcloud_command        | yes      | `gsutil`                        | string  |                                             |
 | backup_gcloud_upload_enabled | yes      | `false`                         | bool    |                                             |
 | backup_gcloud_bucket_name    | yes      | `mybucket`                      | string  |                                             |
+| backup_b2_command            | yes      | `b2`                            | string  |                                             |
 | backup_b2_upload_enabled     | yes      | `false`                         | bool    | Enable Backblaze B2 upload.                 |
 | backup_b2_bucket_name        | yes      | `mybucket`                      | string  | Backblaze B2 bucket name.                   |
+| backup_restic_command        | yes      | `restic`                        | string  |                                             |
 | backup_restic_enabled        | yes      | `false`                         | bool    |                                             |
 | backup_restic_forget_options | yes      | `--keep-daily 90 --prune`       | string  | See (all options)[https://restic.readthedocs.io/en/latest/060_forget.html#removing-snapshots-according-to-a-policy]. |
 | backup_restic_check_enabled  | yes      | `false`                         | bool    |                                             |
