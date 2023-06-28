@@ -101,7 +101,7 @@ upload() {
 {% if item.vars.aws_upload_enabled | d(backup_aws_upload_enabled) %}
   echo "Uploading to AWS..."
 
-  aws s3 --region {{ backup_aws_region }} \
+  {{ backup_aws_command }} s3 --region {{ backup_aws_region }} \
         cp --only-show-errors \
         ${DEST_FILE} s3://{{ backup_aws_bucket_name }}/${SERVICE}/
 {% endif %}
@@ -109,13 +109,13 @@ upload() {
 {% if item.vars.gcloud_upload_enabled | d(backup_gcloud_upload_enabled) %}
   echo "Uploading to GCloud..."
 
-  gsutil -q cp ${DEST_FILE} gs://{{ backup_gcloud_bucket_name }}/${SERVICE}/
+  {{ backup_gcloud_command }} -q cp ${DEST_FILE} gs://{{ backup_gcloud_bucket_name }}/${SERVICE}/
 {% endif %}
 
 {% if item.vars.b2_upload_enabled | d(backup_b2_upload_enabled) %}
   echo "Uploading to Backblaze B2..."
 
-  b2 upload-file \
+  {{ backup_b2_path }} upload-file \
     --quiet \
     --noProgress \
     {{ backup_b2_bucket_name }} \
@@ -125,20 +125,20 @@ upload() {
 {% endif %}
 
 {% if item.vars.restic_enabled | d(backup_restic_enabled) %}
-  restic --quiet snapshots > /dev/null || restic --quiet init
+  {{ backup_restic_command }} --quiet snapshots > /dev/null || {{ backup_restic_command }} --quiet init
 
   echo "Performing backup through restic..."
 
-  restic --quiet backup ${DEST_DIR} --tag ${SERVICE}
+  {{ backup_restic_command }} --quiet backup ${DEST_DIR} --tag ${SERVICE}
 
   echo "Forgetting old restic snapshots..."
 
-  restic --quiet forget --tag ${SERVICE} {{ backup_restic_forget_options }}
+  {{ backup_restic_command }} --quiet forget --tag ${SERVICE} {{ backup_restic_forget_options }}
 
 {%   if item.vars.restic_check_enabled | d(backup_restic_check_enabled) %}
   echo "Checking restic data..."
 
-  restic --quiet check
+  {{ backup_restic_command }} --quiet check
 {%   endif %}
 {% endif %}
 }
