@@ -14,8 +14,8 @@ Ansible 2.10 or newer.
 Supported Platforms
 -------------------
 
-- [Debian - 10 (Buster)](https://wiki.debian.org/DebianBuster)
 - [Debian - 11 (Bullseye)](https://wiki.debian.org/DebianBullseye)
+- [Debian - 12 (Bookworm)](https://wiki.debian.org/DebianBookworm)
 - [Ubuntu - 18.04 (Bionic Beaver)](http://releases.ubuntu.com/18.04/)
 - [Ubuntu - 22.04 (Jammy Jellyfish)](http://releases.ubuntu.com/22.04/)
 
