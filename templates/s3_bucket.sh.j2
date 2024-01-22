@@ -12,8 +12,8 @@ DEST_FILE={{ backup_temp_dir }}/${SERVICE}-${DATE}.tar
 BUCKET_NAME={{ item.vars.bucket_name }}
 S3_SYNC_PATH={{ item.vars.s3_sync_path }}
 
-{% for item in backup_env %}
-export {{ item }}
+{% for key, value in backup_env.items() %}
+export {{ key }}={{ value }}
 {% endfor %}
 
 finish() {

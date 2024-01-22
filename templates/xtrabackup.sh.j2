@@ -15,8 +15,8 @@ MYSQL_PASSWORD={{ item.vars.mysql_password }}
 XTRABACKUP_BACKUP_OPTIONS="{{ item.vars.xtrabackup_backup_options | d('') }}"
 XTRABACKUP_PREPARE_OPTIONS="{{ item.vars.xtrabackup_prepare_options | d('') }}"
 
-{% for item in backup_env %}
-export {{ item }}
+{% for key, value in backup_env.items() %}
+export {{ key }}={{ value }}
 {% endfor %}
 
 finish() {

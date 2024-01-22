@@ -11,8 +11,8 @@ FILES_PATH={{ item.vars.files_path }}
 DATE=$(date +%Y%m%dT%H%M%S)
 DEST_FILE={{ backup_temp_dir }}/${SERVICE}-${DATE}.tar
 
-{% for item in backup_env %}
-export {{ item }}
+{% for key, value in backup_env.items() %}
+export {{ key }}={{ value }}
 {% endfor %}
 
 finish() {

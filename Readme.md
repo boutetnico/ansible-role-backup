@@ -32,7 +32,7 @@ Role Variables
 | backup_temp_dir              | yes      | `{{ backup_home_dir }}/temp`    | string  |                                             |
 | backup_extra_dir             | yes      | `[]`                            | list    | Create additional directories if needed     |
 | backup_dependencies          | yes      | `[cron, gzip, tar, util-linux]` | list    |                                             |
-| backup_env                   | yes      | `[]`                            | list    |                                             |
+| backup_env                   | yes      | `{}`                            | dict    |                                             |
 | backup_archive_enabled       | yes      | `true`                          | bool    | Wether or not to pack files into an archive |
 | backup_compression_enabled   | yes      | `true`                          | bool    | Wether or not to compress the archive file  |
 | backup_compressor            | yes      | `gzip`                          | string  |                                             |

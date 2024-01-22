@@ -14,8 +14,8 @@ INFLUXDB_HOST="{{ item.vars.influxdb_host }}"
 INFLUXDB_TOKEN="{{ item.vars.influxdb_token }}"
 INFLUXDB_OPTIONS="{{ item.vars.influxdb_options | d('') }}"
 
-{% for item in backup_env %}
-export {{ item }}
+{% for key, value in backup_env.items() %}
+export {{ key }}={{ value }}
 {% endfor %}
 
 finish() {

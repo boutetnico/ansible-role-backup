@@ -14,8 +14,8 @@ MONGODB_ENDPOINT={{ item.vars.mongodb_endpoint }}
 MONGODB_USER={{ item.vars.mongodb_user }}
 MONGODB_PASSWORD={{ item.vars.mongodb_password }}
 
-{% for item in backup_env %}
-export {{ item }}
+{% for key, value in backup_env.items() %}
+export {{ key }}={{ value }}
 {% endfor %}
 
 finish() {

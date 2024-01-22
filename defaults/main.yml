@@ -25,10 +25,10 @@ backup_dependencies:
   - util-linux
 
 # Add environnement variables to backup scripts
-backup_env: []
-# - PATH="$PATH:/usr/local/bin"
-# - RESTIC_REPOSITORY=/srv/restic-repo
-# - RESTIC_PASSWORD=_secret_
+backup_env: {}
+# PATH: "$PATH:/usr/local/bin"
+# RESTIC_REPOSITORY: /srv/restic-repo
+# RESTIC_PASSWORD: _secret_
 
 backup_archive_enabled: true
 

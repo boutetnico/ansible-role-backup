@@ -18,8 +18,8 @@ MYSQL_PASSWORD={{ item.vars.mysql_password }}
 MARIABACKUP_DOCKER_IMAGE={{ item.vars.mariabackup_docker_image }}
 MARIABACKUP_OPTIONS="{{ item.vars.mariabackup_options | d('') }}"
 
-{% for item in backup_env %}
-export {{ item }}
+{% for key, value in backup_env.items() %}
+export {{ key }}={{ value }}
 {% endfor %}
 
 finish() {
