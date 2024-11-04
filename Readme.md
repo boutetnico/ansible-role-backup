@@ -89,6 +89,7 @@ Example Playbook
                 mysql_endpoint: localhost
                 mysql_databases:
                   - site
+                mysqldump_options: "--get-server-public-key"
               cron:
                 hour: "*/6"
                 minute: 30
