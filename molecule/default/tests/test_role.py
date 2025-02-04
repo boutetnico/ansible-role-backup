@@ -1,7 +1,7 @@
 import pytest
 
 
-@pytest.mark.parametrize("group", [("backupd")])
+@pytest.mark.parametrize("group", ["backupd"])
 def test_backup_group_exists(host, group):
     backup_group = host.group(group)
     assert backup_group.exists
