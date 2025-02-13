@@ -21,6 +21,7 @@ backup_extra_dir: []
 backup_dependencies:
   - cron
   - gzip
+  - openssl
   - tar
   - util-linux
 
@@ -35,6 +36,10 @@ backup_archive_enabled: true
 backup_compression_enabled: true
 backup_compressor: gzip
 backup_compression_level: 1
+
+backup_encryption_enabled: false
+backup_encryption_key: my_secure_key
+backup_encryption_algo: aes-256-cbc
 
 backup_aws_command: aws
 backup_aws_upload_enabled: false

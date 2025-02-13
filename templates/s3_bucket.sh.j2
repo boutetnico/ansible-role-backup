@@ -67,6 +67,23 @@ compress() {
 {% endif %}
 }
 
+encrypt() {
+{% if item.vars.encryption_enabled | d(backup_encryption_enabled) %}
+  ENCRYPTED_FILE="${DEST_FILE}.enc"
+
+  echo "Encrypting backup using OpenSSL {{ backup_encryption_algo }}..."
+
+  export BACKUP_ENCRYPTION_KEY={{ backup_encryption_key }}
+  openssl enc -{{ backup_encryption_algo }} -salt -pbkdf2 -in "${DEST_FILE}" -out "${ENCRYPTED_FILE}" -pass env:BACKUP_ENCRYPTION_KEY
+  unset BACKUP_ENCRYPTION_KEY
+
+  rm -f "${DEST_FILE}"
+  DEST_FILE="${ENCRYPTED_FILE}"
+{% else %}
+  echo "Skipping encrypting..."
+{% endif %}
+}
+
 upload() {
 {% if item.vars.aws_upload_enabled | d(backup_aws_upload_enabled) %}
   echo "Uploading to AWS..."
@@ -115,4 +132,5 @@ upload() {
 
 prepare
 compress
+encrypt
 upload

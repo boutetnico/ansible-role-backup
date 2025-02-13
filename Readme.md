@@ -22,38 +22,41 @@ Supported Platforms
 Role Variables
 --------------
 
-| Variable                     | Required | Default                         | Choices | Comments                                    |
-|------------------------------|----------|---------------------------------|---------|---------------------------------------------|
-| backup_user                  | yes      | `backupd`                       | string  | User who runs backup scripts                |
-| backup_group                 | yes      | `backupd`                       | string  |                                             |
-| backup_extra_groups          | yes      | `[]`                            | list    | Add `backup_user` to additional groups      |
-| backup_home_dir              | yes      | `/home/{{ backup_user }}`       | string  |                                             |
-| backup_scripts_dir           | yes      | `{{ backup_home_dir }}/scripts` | string  |                                             |
-| backup_temp_dir              | yes      | `{{ backup_home_dir }}/temp`    | string  |                                             |
-| backup_extra_dir             | yes      | `[]`                            | list    | Create additional directories if needed     |
-| backup_dependencies          | yes      | `[cron, gzip, tar, util-linux]` | list    |                                             |
-| backup_env                   | yes      | `{}`                            | dict    |                                             |
-| backup_archive_enabled       | yes      | `true`                          | bool    | Wether or not to pack files into an archive |
-| backup_compression_enabled   | yes      | `true`                          | bool    | Wether or not to compress the archive file  |
-| backup_compressor            | yes      | `gzip`                          | string  |                                             |
-| backup_compression_level     | yes      | `1`                             | int     |                                             |
-| backup_aws_command           | yes      | `aws`                           | string  |                                             |
-| backup_aws_upload_enabled    | yes      | `false`                         | bool    |                                             |
-| backup_aws_bucket_name       | yes      | `mybucket`                      | string  |                                             |
-| backup_aws_region            | yes      | `us-east-1`                     | string  |                                             |
-| backup_gcloud_command        | yes      | `gsutil`                        | string  |                                             |
-| backup_gcloud_upload_enabled | yes      | `false`                         | bool    |                                             |
-| backup_gcloud_bucket_name    | yes      | `mybucket`                      | string  |                                             |
-| backup_b2_command            | yes      | `b2`                            | string  |                                             |
-| backup_b2_upload_enabled     | yes      | `false`                         | bool    | Enable Backblaze B2 upload.                 |
-| backup_b2_bucket_name        | yes      | `mybucket`                      | string  | Backblaze B2 bucket name.                   |
-| backup_restic_command        | yes      | `restic`                        | string  |                                             |
-| backup_restic_enabled        | yes      | `false`                         | bool    |                                             |
+| Variable                     | Required | Default                         | Choices | Comments                                     |
+|------------------------------|----------|---------------------------------|---------|----------------------------------------------|
+| backup_user                  | yes      | `backupd`                       | string  | User who runs backup scripts.                |
+| backup_group                 | yes      | `backupd`                       | string  |                                              |
+| backup_extra_groups          | yes      | `[]`                            | list    | Add `backup_user` to additional groups.      |
+| backup_home_dir              | yes      | `/home/{{ backup_user }}`       | string  |                                              |
+| backup_scripts_dir           | yes      | `{{ backup_home_dir }}/scripts` | string  |                                              |
+| backup_temp_dir              | yes      | `{{ backup_home_dir }}/temp`    | string  |                                              |
+| backup_extra_dir             | yes      | `[]`                            | list    | Create additional directories if needed.     |
+| backup_dependencies          | yes      |                                 | list    | See `defaults/main.yml`.                     |
+| backup_env                   | yes      | `{}`                            | dict    |                                              |
+| backup_archive_enabled       | yes      | `true`                          | bool    | Wether or not to pack files into an archive. |
+| backup_compression_enabled   | yes      | `true`                          | bool    | Wether or not to compress the archive file.  |
+| backup_compressor            | yes      | `gzip`                          | string  |                                              |
+| backup_compression_level     | yes      | `1`                             | int     |                                              |
+| backup_encryption_enabled    | yes      | `false`                         | bool    | Wether or not to encrypt the archive file.   |
+| backup_encryption_key        | yes      | `my_secure_key`                 | string  | Encryption key.                              |
+| backup_encryption_algo       | yes      | `aes-256-cbc`                   | string  | Encryption algorithm.                        |
+| backup_aws_command           | yes      | `aws`                           | string  |                                              |
+| backup_aws_upload_enabled    | yes      | `false`                         | bool    |                                              |
+| backup_aws_bucket_name       | yes      | `mybucket`                      | string  |                                              |
+| backup_aws_region            | yes      | `us-east-1`                     | string  |                                              |
+| backup_gcloud_command        | yes      | `gsutil`                        | string  |                                              |
+| backup_gcloud_upload_enabled | yes      | `false`                         | bool    |                                              |
+| backup_gcloud_bucket_name    | yes      | `mybucket`                      | string  |                                              |
+| backup_b2_command            | yes      | `b2`                            | string  |                                              |
+| backup_b2_upload_enabled     | yes      | `false`                         | bool    | Enable Backblaze B2 upload.                  |
+| backup_b2_bucket_name        | yes      | `mybucket`                      | string  | Backblaze B2 bucket name.                    |
+| backup_restic_command        | yes      | `restic`                        | string  |                                              |
+| backup_restic_enabled        | yes      | `false`                         | bool    |                                              |
 | backup_restic_forget_options | yes      | `--keep-daily 90 --prune`       | string  | See (all options)[https://restic.readthedocs.io/en/latest/060_forget.html#removing-snapshots-according-to-a-policy]. |
-| backup_restic_check_enabled  | yes      | `false`                         | bool    |                                             |
-| backup_cron_syslog_enabled   | yes      | `true`                          | bool    | Log script output to syslog                 |
-| backup_cron_syslog_tag       | yes      | `cron_backup_`                  | string  |                                             |
-| backup_services              | yes      | `[]`                            | list    | Scripts to install. See `defaults/main.yml` |
+| backup_restic_check_enabled  | yes      | `false`                         | bool    |                                              |
+| backup_cron_syslog_enabled   | yes      | `true`                          | bool    | Log script output to syslog.                 |
+| backup_cron_syslog_tag       | yes      | `cron_backup_`                  | string  |                                              |
+| backup_services              | yes      | `[]`                            | list    | Scripts to install. See `defaults/main.yml`. |
 
 Dependencies
 ------------
