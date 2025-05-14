@@ -113,9 +113,8 @@ upload() {
 {% if item.vars.b2_upload_enabled | d(backup_b2_upload_enabled) %}
   echo "Uploading to Backblaze B2..."
 
-  {{ backup_b2_command }} upload-file \
-    --quiet \
-    --noProgress \
+  {{ backup_b2_command }} file upload \
+    --no-progress \
     {{ backup_b2_bucket_name }} \
     ${DEST_FILE} \
     ${SERVICE}/$(basename ${DEST_FILE}) \
