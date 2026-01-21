@@ -40,6 +40,7 @@
   loop: "{{ backup_services }}"
   loop_control:
     label: "{{ item.name }}"
+  no_log: true
 
 - name: Install cron jobs to run backup scripts
   ansible.builtin.cron:
