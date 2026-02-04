@@ -13,10 +13,20 @@ def test_backup_user_exists(host, user, group, home):
     assert backup_user.name == user
     assert backup_user.group == group
     assert backup_user.home == home
+    assert backup_user.shell == "/bin/bash"
 
 
-@pytest.mark.parametrize("name", [("cron"), ("gzip"), ("tar"), ("util-linux")])
-def test_packages_are_installed(host, name):
+@pytest.mark.parametrize(
+    "name",
+    [
+        ("cron"),
+        ("gzip"),
+        ("openssl"),
+        ("tar"),
+        ("util-linux"),
+    ],
+)
+def test_dependencies_are_installed(host, name):
     package = host.package(name)
     assert package.is_installed
 
@@ -46,16 +56,22 @@ def test_directories_exist(host, path, user, group, mode):
         ("/home/backupd/scripts/s3_bucket.sh", "backupd", "backupd", 0o750),
         ("/home/backupd/scripts/mongodb.sh", "backupd", "backupd", 0o750),
         ("/home/backupd/scripts/xtrabackup.sh", "backupd", "backupd", 0o750),
+        ("/home/backupd/scripts/docker_mariabackup.sh", "backupd", "backupd", 0o750),
         ("/home/backupd/scripts/influxdb.sh", "backupd", "backupd", 0o750),
     ],
 )
 def test_scripts_exist(host, path, user, group, mode):
-    directory = host.file(path)
-    assert directory.exists
-    assert directory.is_file
-    assert directory.user == user
-    assert directory.group == group
-    assert directory.mode == mode
+    script = host.file(path)
+    assert script.exists
+    assert script.is_file
+    assert script.user == user
+    assert script.group == group
+    assert script.mode == mode
+
+
+def test_scripts_have_bash_shebang(host):
+    script = host.file("/home/backupd/scripts/files.sh")
+    assert script.contains("#!/bin/bash")
 
 
 @pytest.mark.parametrize(
@@ -82,6 +98,11 @@ def test_scripts_exist(host, path, user, group, mode):
             "backupd",
         ),
         (
+            "27 */1 * * * /home/backupd/scripts/docker_mariabackup.sh 2>&1 | \
+/usr/bin/logger -t cron_backup_docker_mariabackup",
+            "backupd",
+        ),
+        (
             "6 21 * * * /home/backupd/scripts/influxdb.sh 2>&1 | \
 /usr/bin/logger -t cron_backup_influxdb",
             "backupd",
@@ -91,3 +112,8 @@ def test_scripts_exist(host, path, user, group, mode):
 def test_cron_jobs_exist(host, job, user):
     jobs = host.check_output("crontab -u " + user + " -l")
     assert job in jobs
+
+
+def test_cron_command_is_available(host):
+    cmd = host.run("which crontab")
+    assert cmd.rc == 0
