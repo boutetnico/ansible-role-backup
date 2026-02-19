@@ -7,10 +7,10 @@
 - name: Ensure backup user exists
   ansible.builtin.user:
     append: "{{ true if backup_extra_groups | length > 0 else false }}"
-    group: "{{ backup_user }}"
+    group: "{{ backup_group }}"
     groups: "{{ backup_extra_groups }}"
     home: "{{ backup_home_dir }}"
-    name: "{{ backup_group }}"
+    name: "{{ backup_user }}"
     shell: /bin/bash
     state: present
   when: backup_group != "root"
