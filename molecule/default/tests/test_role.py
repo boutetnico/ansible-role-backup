@@ -58,6 +58,7 @@ def test_directories_exist(host, path, user, group, mode):
         ("/home/backupd/scripts/xtrabackup.sh", "backupd", "backupd", 0o750),
         ("/home/backupd/scripts/docker_mariabackup.sh", "backupd", "backupd", 0o750),
         ("/home/backupd/scripts/influxdb.sh", "backupd", "backupd", 0o750),
+        ("/home/backupd/scripts/mariadb_dump.sh", "backupd", "backupd", 0o750),
     ],
 )
 def test_scripts_exist(host, path, user, group, mode):
@@ -105,6 +106,11 @@ def test_scripts_have_bash_shebang(host):
         (
             "6 21 * * * /home/backupd/scripts/influxdb.sh 2>&1 | \
 /usr/bin/logger -t cron_backup_influxdb",
+            "backupd",
+        ),
+        (
+            "15 4 * * * /home/backupd/scripts/mariadb_dump.sh 2>&1 | \
+/usr/bin/logger -t cron_backup_mariadb_dump",
             "backupd",
         ),
     ],

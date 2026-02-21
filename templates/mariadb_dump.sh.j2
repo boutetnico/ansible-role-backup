@@ -1,0 +1,145 @@
+#!/bin/bash
+
+# {{ ansible_managed }}
+
+set -o errexit   # abort on nonzero exitstatus
+set -o nounset   # abort on unbound variable
+set -o pipefail  # don't hide errors within pipes
+
+SERVICE={{ item.name }}
+DATE=$(date +%Y%m%dT%H%M%S)
+DEST_DIR={{ backup_temp_dir }}/${SERVICE}-${DATE}
+DEST_FILE={{ backup_temp_dir }}/${SERVICE}-${DATE}.tar
+MARIADB_DATABASES=({{ item.vars.mariadb_databases | join(' ') }})
+MARIADB_HOST={{ item.vars.mariadb_host }}
+MARIADB_USER={{ item.vars.mariadb_user }}
+MARIADB_PASSWORD={{ item.vars.mariadb_password }}
+MARIADB_DUMP_OPTIONS="{{ item.vars.mariadb_dump_options | d('') }}"
+
+{% for key, value in backup_env.items() %}
+export {{ key }}={{ value }}
+{% endfor %}
+
+finish() {
+  result=$?
+
+  rm -rf ${DEST_DIR} ${DEST_FILE}
+
+  if [ ${result} -ne 0 ]; then
+    echo "Error: non-zero exit code $result" 1>&2
+  else
+    echo "Backup completed"
+  fi
+
+  exit ${result}
+}
+
+trap finish EXIT ERR
+
+prepare() {
+  umask 027
+  mkdir -p ${DEST_DIR}
+
+  echo "Starting backup..."
+
+  echo "Dumping MariaDB data..."
+
+  for database in "${MARIADB_DATABASES[@]}"
+  do
+    mariadb-dump --host=${MARIADB_HOST} \
+                 --user=${MARIADB_USER} \
+                 --password=${MARIADB_PASSWORD} \
+                 --single-transaction \
+                 ${MARIADB_DUMP_OPTIONS} \
+                 ${database} > ${DEST_DIR}/${database}.sql
+  done
+
+  # Check emptiness
+  if [ ! "$(ls -A ${DEST_DIR})" ]; then
+    echo "Error: empty backup" 1>&2
+    exit 1
+  fi
+}
+
+compress() {
+{% if item.vars.compression_enabled | d(backup_compression_enabled) %}
+  DEST_FILE=${DEST_FILE}.{{ backup_compressor[0:2] }}
+
+  echo "Creating a compressed archive..."
+
+  tar -C ${DEST_DIR} {{ item.vars.tar_options | d('') }} -cf - . | {{ backup_compressor }} -{{ backup_compression_level }} > ${DEST_FILE}
+{% elif item.vars.archive_enabled | d(backup_archive_enabled) %}
+  echo "Creating an uncompressed archive..."
+
+  tar -C ${DEST_DIR} {{ item.vars.tar_options | d('') }} -cf ${DEST_FILE} .
+{% else %}
+  echo "Skipping archiving and compressing..."
+{% endif %}
+}
+
+encrypt() {
+{% if item.vars.encryption_enabled | d(backup_encryption_enabled) %}
+  ENCRYPTED_FILE="${DEST_FILE}.enc"
+
+  echo "Encrypting backup using OpenSSL {{ backup_encryption_algo }}..."
+
+  export BACKUP_ENCRYPTION_KEY={{ backup_encryption_key }}
+  openssl enc -{{ backup_encryption_algo }} -salt -pbkdf2 -in "${DEST_FILE}" -out "${ENCRYPTED_FILE}" -pass env:BACKUP_ENCRYPTION_KEY
+  unset BACKUP_ENCRYPTION_KEY
+
+  rm -f "${DEST_FILE}"
+  DEST_FILE="${ENCRYPTED_FILE}"
+{% else %}
+  echo "Skipping encrypting..."
+{% endif %}
+}
+
+upload() {
+{% if item.vars.aws_upload_enabled | d(backup_aws_upload_enabled) %}
+  echo "Uploading to AWS..."
+
+  {{ backup_aws_command }} s3 --region {{ backup_aws_region }} \
+        cp --only-show-errors \
+        ${DEST_FILE} s3://{{ backup_aws_bucket_name }}/${SERVICE}/
+{% endif %}
+
+{% if item.vars.gcloud_upload_enabled | d(backup_gcloud_upload_enabled) %}
+  echo "Uploading to GCloud..."
+
+  {{ backup_gcloud_command }} -q cp ${DEST_FILE} gs://{{ backup_gcloud_bucket_name }}/${SERVICE}/
+{% endif %}
+
+{% if item.vars.b2_upload_enabled | d(backup_b2_upload_enabled) %}
+  echo "Uploading to Backblaze B2..."
+
+  {{ backup_b2_command }} file upload \
+    --no-progress \
+    {{ backup_b2_bucket_name }} \
+    ${DEST_FILE} \
+    ${SERVICE}/$(basename ${DEST_FILE}) \
+    > /dev/null
+{% endif %}
+
+{% if item.vars.restic_enabled | d(backup_restic_enabled) %}
+  {{ backup_restic_command }} --quiet snapshots > /dev/null || {{ backup_restic_command }} --quiet init
+
+  echo "Performing backup through restic..."
+
+  {{ backup_restic_command }} --quiet backup ${DEST_DIR} --tag ${SERVICE}
+
+  echo "Forgetting old restic snapshots..."
+
+  {{ backup_restic_command }} --quiet forget --tag ${SERVICE} {{ backup_restic_forget_options }}
+
+{%   if item.vars.restic_check_enabled | d(backup_restic_check_enabled) %}
+  echo "Checking restic data..."
+
+  {{ backup_restic_command }} --quiet check
+{%   endif %}
+{% endif %}
+}
+
+prepare
+compress
+encrypt
+upload

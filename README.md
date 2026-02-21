@@ -134,6 +134,18 @@ Example Playbook
               cron:
                 hour: 14
                 minute: 30
+            - name: site-mariadb
+              script: mariadb_dump.sh
+              vars:
+                mariadb_user: backup
+                mariadb_password: backup
+                mariadb_host: localhost
+                mariadb_databases:
+                  - site
+                mariadb_dump_options: ""
+              cron:
+                hour: 4
+                minute: 15
             - name: docker_mariabackup
               script: docker_mariabackup.sh
               vars:

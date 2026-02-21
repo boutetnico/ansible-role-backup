@@ -74,3 +74,14 @@
           cron:
             hour: 21
             minute: 6
+        - name: mariadb_dump
+          script: mariadb_dump.sh
+          vars:
+            mariadb_user: backup
+            mariadb_password: backup
+            mariadb_host: localhost
+            mariadb_databases:
+              - site
+          cron:
+            hour: 4
+            minute: 15
