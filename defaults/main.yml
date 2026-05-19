@@ -88,6 +88,9 @@ backup_services: []
 #     bucket_name: photos
 #     s3_sync_path: "/mnt/photos-s3-mirror"
 #     s3_sync_options: "--follow-symlinks"
+#     # Continue when objects vanish between listing and download
+#     # (NoSuchKey). Other errors abort. Default true.
+#     s3_sync_skip_deleted: true
 #   cron:
 #     hour: 5
 #     minute: 20

@@ -43,10 +43,36 @@ prepare() {
 
   echo "Syncing remote bucket with local copy..."
 
+  sync_log=$(mktemp)
+  sync_status=0
   {{ backup_aws_command }} s3 sync --delete \
               --only-show-errors \
               {{ item.vars.s3_sync_options | d('') }} \
-              s3://${BUCKET_NAME}/ ${S3_SYNC_PATH}/
+              s3://${BUCKET_NAME}/ ${S3_SYNC_PATH}/ 2>"${sync_log}" || sync_status=$?
+
+  cat "${sync_log}" 1>&2
+
+  if [ ${sync_status} -ne 0 ]; then
+{% if item.vars.s3_sync_skip_deleted | d(true) %}
+    # Exit code 1 means individual file transfers failed. Tolerate it
+    # only when *every* failure is an object that vanished from the
+    # bucket between listing and download (NoSuchKey) — any other error
+    # (AccessDenied, throttling, no space left, ...) still aborts.
+    if [ ${sync_status} -eq 1 ] && [ -s "${sync_log}" ] \
+       && ! grep -qvF 'NoSuchKey' "${sync_log}"; then
+      echo "Warning: s3 sync skipped objects deleted mid-sync (NoSuchKey)" 1>&2
+    else
+      echo "Error: s3 sync failed with exit code ${sync_status}" 1>&2
+      rm -f "${sync_log}"
+      exit ${sync_status}
+    fi
+{% else %}
+    echo "Error: s3 sync failed with exit code ${sync_status}" 1>&2
+    rm -f "${sync_log}"
+    exit ${sync_status}
+{% endif %}
+  fi
+  rm -f "${sync_log}"
 
   # Check emptiness
   if [ ! "$(ls -A ${S3_SYNC_PATH})" ]; then
