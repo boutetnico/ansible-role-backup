@@ -16,10 +16,14 @@ S3_SYNC_PATH={{ item.vars.s3_sync_path }}
 export {{ key }}={{ value }}
 {% endfor %}
 
+# Clean orphans from previous failed runs of this service
+rm -rf "{{ backup_temp_dir }}/${SERVICE}-"[0-9]* 2>/dev/null || true
+
 finish() {
   result=$?
 
   rm -rf ${DEST_FILE}
+  rm -f "{{ backup_temp_dir }}/${SERVICE}-${DATE}".*
 
   if [ ${result} -ne 0 ]; then
     echo "Error: non-zero exit code $result" 1>&2
