@@ -41,6 +41,11 @@ backup_encryption_enabled: false
 backup_encryption_key: my_secure_key
 backup_encryption_algo: aes-256-cbc
 
+# Retry transient upload failures: number of attempts, and base delay
+# in seconds (waits attempt * delay between tries).
+backup_upload_retries: 3
+backup_upload_retry_delay: 60
+
 backup_aws_command: aws
 backup_aws_upload_enabled: false
 backup_aws_bucket_name: mybucket

@@ -40,6 +40,8 @@ Role Variables
 | backup_encryption_enabled    | yes      | `false`                         | bool    | Wether or not to encrypt the archive file.   |
 | backup_encryption_key        | yes      | `my_secure_key`                 | string  | Encryption key.                              |
 | backup_encryption_algo       | yes      | `aes-256-cbc`                   | string  | Encryption algorithm.                        |
+| backup_upload_retries        | yes      | `3`                             | int     | Attempts for cloud upload commands.          |
+| backup_upload_retry_delay    | yes      | `60`                            | int     | Base delay in seconds between attempts.      |
 | backup_aws_command           | yes      | `aws`                           | string  |                                              |
 | backup_aws_upload_enabled    | yes      | `false`                         | bool    |                                              |
 | backup_aws_bucket_name       | yes      | `mybucket`                      | string  |                                              |

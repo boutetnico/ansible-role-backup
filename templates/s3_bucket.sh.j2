@@ -36,6 +36,19 @@ finish() {
 
 trap finish EXIT ERR
 
+retry() {
+  local attempt
+  for (( attempt=1; attempt <= {{ backup_upload_retries }}; attempt++ )); do
+    "$@" && return 0
+    if [ ${attempt} -lt {{ backup_upload_retries }} ]; then
+      echo "Command failed (attempt ${attempt}/{{ backup_upload_retries }}), retrying in $((attempt * {{ backup_upload_retry_delay }}))s..." 1>&2
+      sleep $((attempt * {{ backup_upload_retry_delay }}))
+    fi
+  done
+  echo "Command failed after {{ backup_upload_retries }} attempts: $*" 1>&2
+  return 1
+}
+
 prepare() {
   umask 027
 
@@ -118,7 +131,7 @@ upload() {
 {% if item.vars.aws_upload_enabled | d(backup_aws_upload_enabled) %}
   echo "Uploading to AWS..."
 
-  {{ backup_aws_command }} s3 --region {{ backup_aws_region }} \
+  retry {{ backup_aws_command }} s3 --region {{ backup_aws_region }} \
         cp --only-show-errors \
         ${DEST_FILE} s3://{{ backup_aws_bucket_name }}/${SERVICE}/
 {% endif %}
@@ -126,13 +139,13 @@ upload() {
 {% if item.vars.gcloud_upload_enabled | d(backup_gcloud_upload_enabled) %}
   echo "Uploading to GCloud..."
 
-  {{ backup_gcloud_command }} -q cp ${DEST_FILE} gs://{{ backup_gcloud_bucket_name }}/${SERVICE}/
+  retry {{ backup_gcloud_command }} -q cp ${DEST_FILE} gs://{{ backup_gcloud_bucket_name }}/${SERVICE}/
 {% endif %}
 
 {% if item.vars.b2_upload_enabled | d(backup_b2_upload_enabled) %}
   echo "Uploading to Backblaze B2..."
 
-  {{ backup_b2_command }} file upload \
+  retry {{ backup_b2_command }} file upload \
     --no-progress \
     {{ backup_b2_bucket_name }} \
     ${DEST_FILE} \
