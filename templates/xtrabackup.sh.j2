@@ -52,6 +52,21 @@ retry() {
   return 1
 }
 
+tar_create() {
+  local status=0
+
+  tar "$@" || status=$?
+
+  # tar exits 1 when a file changed while being read. The archive is
+  # still usable, so keep going; only fatal errors (exit 2) abort.
+  if [ ${status} -eq 1 ]; then
+    echo "Warning: some files changed while being archived" 1>&2
+    status=0
+  fi
+
+  return ${status}
+}
+
 prepare() {
   umask 027
   mkdir -p ${DEST_DIR}
@@ -85,11 +100,11 @@ compress() {
 
   echo "Creating a compressed archive..."
 
-  tar -C ${DEST_DIR} {{ item.vars.tar_options | d('') }} -cf - . | {{ backup_compressor }} -{{ backup_compression_level }} > ${DEST_FILE}
+  tar_create -C ${DEST_DIR} {{ item.vars.tar_options | d('') }} -cf - . | {{ backup_compressor }} -{{ backup_compression_level }} > ${DEST_FILE}
 {% elif item.vars.archive_enabled | d(backup_archive_enabled) %}
   echo "Creating an uncompressed archive..."
 
-  tar -C ${DEST_DIR} {{ item.vars.tar_options | d('') }} -cf ${DEST_FILE} .
+  tar_create -C ${DEST_DIR} {{ item.vars.tar_options | d('') }} -cf ${DEST_FILE} .
 {% else %}
   echo "Skipping archiving and compressing..."
 {% endif %}
