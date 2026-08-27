@@ -1,0 +1,61 @@
+#!/bin/bash
+
+# {{ ansible_managed }}
+
+set -o errexit   # abort on nonzero exitstatus
+set -o nounset   # abort on unbound variable
+set -o pipefail  # don't hide errors within pipes
+
+SOURCE={{ item.vars.rclone_source }}
+DEST={{ item.vars.rclone_dest }}
+
+{% for key, value in backup_env.items() %}
+export {{ key }}="{{ value }}"
+{% endfor %}
+{% for key, value in backup_rclone_env.items() %}
+export {{ key }}="{{ value }}"
+{% endfor %}
+{% for key, value in item.vars.rclone_env | d({}) | dictsort %}
+export {{ key }}="{{ value }}"
+{% endfor %}
+
+finish() {
+  result=$?
+
+  if [ ${result} -ne 0 ]; then
+    echo "Error: non-zero exit code $result" 1>&2
+  else
+    echo "Backup completed"
+  fi
+
+  exit ${result}
+}
+
+trap finish EXIT ERR
+
+echo "Replicating ${SOURCE} to ${DEST}..."
+
+sync_log=$(mktemp)
+sync_status=0
+
+{{ backup_rclone_command }} sync \
+  "${SOURCE}" \
+  "${DEST}" \
+  {{ (backup_rclone_options ~ ' ' ~ item.vars.rclone_options | d('')) | trim }} 2>"${sync_log}" || sync_status=$?
+
+cat "${sync_log}" 1>&2
+
+if [ ${sync_status} -ne 0 ]; then
+{% if item.vars.rclone_skip_deleted | d(true) %}
+  # Tolerate objects deleted between listing and copy; any other error aborts.
+  if grep -q 'ERROR' "${sync_log}" \
+     && ! grep 'ERROR' "${sync_log}" | grep -qv 'object not found'; then
+    echo "Warning: rclone skipped objects deleted mid-sync (object not found)" 1>&2
+    sync_status=0
+  fi
+{% endif %}
+fi
+
+rm -f "${sync_log}"
+
+exit ${sync_status}

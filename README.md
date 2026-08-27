@@ -52,6 +52,9 @@ Role Variables
 | backup_b2_command            | yes      | `b2`                            | string  |                                              |
 | backup_b2_upload_enabled     | yes      | `false`                         | bool    | Enable Backblaze B2 upload.                  |
 | backup_b2_bucket_name        | yes      | `mybucket`                      | string  | Backblaze B2 bucket name.                    |
+| backup_rclone_command        | yes      | `rclone`                        | string  |                                              |
+| backup_rclone_options        | yes      | `--log-level NOTICE --stats 0`  | string  | Flags passed to `rclone sync`.               |
+| backup_rclone_env            | yes      | `{}`                            | dict    | Extra env vars for `rclone_sync.sh` only.    |
 | backup_restic_command        | yes      | `restic`                        | string  |                                              |
 | backup_restic_enabled        | yes      | `false`                         | bool    |                                              |
 | backup_restic_forget_options | yes      | `--keep-daily 90 --prune`       | string  | See (all options)[https://restic.readthedocs.io/en/latest/060_forget.html#removing-snapshots-according-to-a-policy]. |
@@ -65,6 +68,7 @@ Dependencies
 
 - `backup_aws_*` options require [`awscli` package](https://github.com/boutetnico/ansible-role-awscli).
 - `backup_gcloud_*` options require `gcloud` package.
+- `backup_rclone_*` options require the `rclone` package.
 - `backup_restic_*` options require [`restic` package](https://github.com/boutetnico/ansible-role-restic).
 - `backup_b2_*` options require [`b2` package](https://github.com/boutetnico/ansible-role-b2).
 
@@ -111,6 +115,17 @@ Example Playbook
                 hour: 5
                 minute: 20
                 weekday: 0
+            - name: photos-offsite
+              script: rclone_sync.sh
+              vars:
+                rclone_source: "s3:photos"
+                rclone_dest: "b2:photos-backup"
+                rclone_options: '--exclude "tmp/**"'
+                # Tolerate objects vanishing mid-sync; needs --ignore-errors. Default true.
+                rclone_skip_deleted: true
+              cron:
+                hour: "1,5,9,13,17,21"
+                minute: 10
             - name: site-mongodb
               script: mongodump.sh
               vars:

@@ -59,6 +59,10 @@ backup_b2_command: b2
 backup_b2_upload_enabled: false
 backup_b2_bucket_name: mybucket
 
+backup_rclone_command: rclone
+backup_rclone_options: --log-level NOTICE --stats 0
+backup_rclone_env: {}
+
 backup_restic_command: restic
 backup_restic_enabled: false
 backup_restic_forget_options: --keep-daily 90 --prune
