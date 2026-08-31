@@ -42,19 +42,31 @@ retry() {
   return 1
 }
 
-local_binlogs=$(ls -1 "${BINLOG_DIR}" | grep -E "^${BINLOG_PREFIX}\.[0-9]+$" | sort | sed '$d' || true)
+shopt -s nullglob
+binlogs=("${BINLOG_DIR}/${BINLOG_PREFIX}".[0-9]*)
 
-if [ -z "${local_binlogs}" ]; then
+if [ -z "${binlogs[1]+x}" ]; then
   echo "No completed binlogs to archive"
   exit 0
 fi
 
-remote_binlogs=$({{ backup_aws_command }} s3 --region {{ backup_aws_region }} \
-  ls "s3://{{ backup_aws_bucket_name }}/${S3_PREFIX}/" 2>/dev/null | awk '{print $NF}' || true)
+current=""
+for path in "${binlogs[@]}"; do
+  current="${path}"
+done
+
+remote_binlogs=$({{ backup_aws_command }} s3api --region {{ backup_aws_region }} \
+  list-objects-v2 --bucket {{ backup_aws_bucket_name }} --prefix "${S3_PREFIX}/" \
+  --query 'Contents[].Key' --output text | tr '\t' '\n' | sed 's|.*/||')
 
 archived=0
 
-for binlog in ${local_binlogs}; do
+for path in "${binlogs[@]}"; do
+  if [ "${path}" = "${current}" ]; then
+    continue
+  fi
+
+  binlog=$(basename "${path}")
   name="${binlog}{% if item.vars.compression_enabled | d(backup_compression_enabled) %}.{{ backup_compressor[0:2] }}{% endif %}{% if item.vars.encryption_enabled | d(backup_encryption_enabled) %}.enc{% endif %}"
 
   if echo "${remote_binlogs}" | grep -qxF "${name}"; then
@@ -67,7 +79,7 @@ for binlog in ${local_binlogs}; do
   export BACKUP_ENCRYPTION_KEY={{ backup_encryption_key }}
 {% endif %}
 
-  retry bash -o pipefail -c "cat '${BINLOG_DIR}/${binlog}' \
+  retry bash -o pipefail -c "cat '${path}' \
 {% if item.vars.compression_enabled | d(backup_compression_enabled) %}
     | {{ backup_compressor }} -{{ backup_compression_level }} \
 {% endif %}
