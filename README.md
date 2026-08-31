@@ -126,6 +126,13 @@ Example Playbook
               cron:
                 hour: "1,5,9,13,17,21"
                 minute: 10
+            - name: mysql-binlogs
+              script: binlog_archive.sh
+              vars:
+                binlog_dir: /var/log/mysql
+                s3_prefix: binlogs
+              cron:
+                minute: "*/15"
             - name: site-mongodb
               script: mongodump.sh
               vars:
