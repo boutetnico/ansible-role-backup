@@ -69,7 +69,7 @@ for path in "${binlogs[@]}"; do
   binlog=$(basename "${path}")
   name="${binlog}{% if item.vars.compression_enabled | d(backup_compression_enabled) %}.{{ backup_compressor[0:2] }}{% endif %}{% if item.vars.encryption_enabled | d(backup_encryption_enabled) %}.enc{% endif %}"
 
-  if echo "${remote_binlogs}" | grep -qxF "${name}"; then
+  if grep -qxF "${name}" <<< "${remote_binlogs}"; then
     continue
   fi
 

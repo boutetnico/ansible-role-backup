@@ -49,7 +49,7 @@ if [ ${sync_status} -ne 0 ]; then
 {% if item.vars.rclone_skip_deleted | d(true) %}
   # Tolerate objects deleted between listing and copy; any other error aborts.
   if grep -q 'ERROR' "${sync_log}" \
-     && ! grep 'ERROR' "${sync_log}" | grep -qv 'object not found'; then
+     && ! grep -qv 'object not found' <<< "$(grep 'ERROR' "${sync_log}")"; then
     echo "Warning: rclone skipped objects deleted mid-sync (object not found)" 1>&2
     sync_status=0
   fi
